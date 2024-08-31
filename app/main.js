@@ -48,14 +48,18 @@ function handleCatFileCommand() {
 }
 
 function handleHashObjectCommand() {
+  // Retrieve flag and filePath
   let flag = process.argv[3];
   let filePath = process.argv[4];
 
-  if (!filePath) {
+  // Check if the flag starts with "-" indicating it's a flag
+  if (flag && !flag.startsWith("-")) {
+    // If the first argument isn't a flag, consider it as a filePath, and flag is null
     filePath = flag;
     flag = null;
   }
 
+  // Create and run the HashObjectCommand
   const command = new HashObjectCommand(flag, filePath);
   gitClient.run(command);
 }
