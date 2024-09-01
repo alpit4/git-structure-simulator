@@ -82,6 +82,6 @@ function handleLsTreeCommand() {
     flag = null;
   }
 
-  const command = new LSTreeCommmand(flag, sha);
+  const command = new LSTreeCommand(flag, sha);
   gitClient.run(command);
 }
