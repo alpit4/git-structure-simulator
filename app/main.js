@@ -1,63 +1,87 @@
 const fs = require("fs");
 const path = require("path");
-const zlib = require("zlib");
 
-class LSTreeCommand {
-  constructor(flag, sha) {
-    this.flag = flag;
-    this.sha = sha;
-  }
+const GitClient = require("./git/client");
 
-  execute() {
-    const flag = this.flag;
-    const sha = this.sha;
+const {
+  CatFileCommand,
+  HashObjectCommand,
+  LSTreeCommmand,
+} = require("./git/commands");
+const gitClient = new GitClient();
 
-    const folder = sha.slice(0, 2);
-    const file = sha.slice(2);
+// You can use print statements as follows for debugging, they'll be visible when running tests.
+// console.log("Logs from your program will appear here!");
 
-    const folderPath = path.join(process.cwd(), ".git", "objects", folder);
-    const filePath = path.join(folderPath, file);
-
-    // Debugging output
-    console.log(`Looking for object in: ${filePath}`);
-
-    if (!fs.existsSync(folderPath) || !fs.existsSync(filePath)) {
-      throw new Error(`Not a valid object name ${sha}`);
-    }
-
-    const fileContent = fs.readFileSync(filePath);
-    const outputBuffer = zlib.inflateSync(fileContent);
-
-    // Debugging output
-    console.log(`Inflated object data: ${outputBuffer.toString()}`);
-
-    const output = outputBuffer.toString();
-    const headerEndIndex = output.indexOf("\0") + 1;
-    const bodyBuffer = outputBuffer.slice(headerEndIndex);
-
-    let index = 0;
-    while (index < bodyBuffer.length) {
-      // Read mode (up to the first space)
-      let modeEnd = bodyBuffer.indexOf(0x20, index);
-      let mode = bodyBuffer.slice(index, modeEnd).toString();
-      index = modeEnd + 1;
-
-      // Read name (up to the null byte)
-      let nameEnd = bodyBuffer.indexOf(0x00, index);
-      let name = bodyBuffer.slice(index, nameEnd).toString();
-      index = nameEnd + 1;
-
-      // Read the SHA (20 bytes binary data)
-      let shaBinary = bodyBuffer.slice(index, index + 20);
-      index += 20;
-
-      if (mode && name) {
-        console.log(name.trim());
-      } else {
-        console.log("Empty or invalid name found");
-      }
-    }
-  }
+// Uncomment this block to pass the first stage
+const command = process.argv[2];
+switch (command) {
+  case "init":
+    createGitDirectory();
+    break;
+  case "cat-file":
+    handleCatFileCommand();
+    break;
+  case "hash-object":
+    handleHashObjectCommand();
+    break;
+  case "ls-tree":
+    handleLsTreeCommand();
+    break;
+  default:
+    throw new Error(`Unknown command ${command}`);
 }
 
-module.exports = LSTreeCommand;
+function createGitDirectory() {
+  fs.mkdirSync(path.join(process.cwd(), ".git"), { recursive: true });
+  fs.mkdirSync(path.join(process.cwd(), ".git", "objects"), {
+    recursive: true,
+  });
+  fs.mkdirSync(path.join(process.cwd(), ".git", "refs"), { recursive: true });
+
+  fs.writeFileSync(
+    path.join(process.cwd(), ".git", "HEAD"),
+    "ref: refs/heads/main\n"
+  );
+  console.log("Initialized git directory");
+}
+
+function handleCatFileCommand() {
+  const flag = process.argv[3];
+  const commitSHA = process.argv[4];
+
+  const command = new CatFileCommand(flag, commitSHA);
+  gitClient.run(command);
+}
+
+function handleHashObjectCommand() {
+  // Retrieve flag and filePath
+  let flag = process.argv[3];
+  let filePath = process.argv[4];
+
+  // Check if the flag starts with "-" indicating it's a flag
+  if (flag && !flag.startsWith("-")) {
+    // If the first argument isn't a flag, consider it as a filePath, and flag is null
+    filePath = flag;
+    flag = null;
+  }
+
+  // Create and run the HashObjectCommand
+  const command = new HashObjectCommand(flag, filePath);
+  gitClient.run(command);
+}
+
+function handleLsTreeCommand() {
+  let flag = process.argv[3];
+  let sha = process.argv[4];
+
+  if (!sha && flag === "--name-only") return;
+
+  if (!sha) {
+    sha = flag;
+    flag = null;
+  }
+
+  const command = new LSTreeCommmand(flag, sha);
+  gitClient.run(command);
+}
