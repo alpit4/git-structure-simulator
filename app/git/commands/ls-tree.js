@@ -1,6 +1,3 @@
-const path = require("path");
-const fs = require("fs");
-const zlib = require("zlib");
 class LSTreeCommmand {
   constructor(flag, sha) {
     this.flag = flag;
@@ -26,15 +23,14 @@ class LSTreeCommmand {
     }
 
     const fileContent = fs.readFileSync(filePath);
-
     const outputBuffer = zlib.inflateSync(fileContent);
     const output = outputBuffer.toString().split("\0");
 
-    const treeContent = output.slice(1).filter((e) => e.includes(""));
-    const names = treeContent.map((e) => e.split(" ")[1]);
+    const treeContent = output.slice(1).filter((entry) => entry.includes(" "));
+    const names = treeContent
+      .map((entry) => entry.split(" ")[1])
+      .filter(Boolean);
 
     names.forEach((name) => process.stdout.write(`${name}\n`));
   }
 }
-
-module.exports = LSTreeCommmand;
