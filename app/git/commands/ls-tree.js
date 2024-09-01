@@ -1,4 +1,4 @@
-class LSTreeCommmand {
+class LSTreeCommand {
   constructor(flag, sha) {
     this.flag = flag;
     this.sha = sha;

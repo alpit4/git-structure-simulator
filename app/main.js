@@ -6,7 +6,7 @@ const GitClient = require("./git/client");
 const {
   CatFileCommand,
   HashObjectCommand,
-  LSTreeCommmand,
+  LSTreeCommand,
 } = require("./git/commands");
 const gitClient = new GitClient();
 
