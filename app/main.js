@@ -27,6 +27,7 @@ switch (command) {
     break;
   case "ls-tree":
     handleLsTreeCommand();
+    break;
   default:
     throw new Error(`Unknown command ${command}`);
 }
@@ -74,10 +75,11 @@ function handleLsTreeCommand() {
   let flag = process.argv[3];
   let sha = process.argv[4];
 
-  if (!sha && flag === "--name-only") return;
-
   if (!sha) {
     sha = flag;
     flag = null;
   }
+
+  const command = new LSTreeCommmand(flag, sha);
+  gitClient.run(command);
 }

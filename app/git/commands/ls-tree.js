@@ -14,7 +14,7 @@ class LSTreeCommmand {
     const folder = sha.slice(0, 2);
     const file = sha.slice(2);
 
-    const folderPath = path.join(process.cwd(), "./git", "objects", folder);
+    const folderPath = path.join(process.cwd(), ".git", "objects", folder);
     const filePath = path.join(folderPath, file);
 
     if (!fs.existsSync(folderPath)) {
