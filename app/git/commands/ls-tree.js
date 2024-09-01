@@ -1,3 +1,7 @@
+const path = require("path");
+const fs = require("fs");
+const zlib = require("zlib");
+
 class LSTreeCommand {
   constructor(flag, sha) {
     this.flag = flag;
@@ -34,3 +38,5 @@ class LSTreeCommand {
     names.forEach((name) => process.stdout.write(`${name}\n`));
   }
 }
+
+module.exports = LSTreeCommand;
