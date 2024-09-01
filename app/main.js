@@ -3,7 +3,11 @@ const path = require("path");
 
 const GitClient = require("./git/client");
 
-const { CatFileCommand, HashObjectCommand } = require("./git/commands");
+const {
+  CatFileCommand,
+  HashObjectCommand,
+  LSTreeCommmand,
+} = require("./git/commands");
 const gitClient = new GitClient();
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -21,6 +25,8 @@ switch (command) {
   case "hash-object":
     handleHashObjectCommand();
     break;
+  case "ls-tree":
+    handleLsTreeCommand();
   default:
     throw new Error(`Unknown command ${command}`);
 }
@@ -62,4 +68,16 @@ function handleHashObjectCommand() {
   // Create and run the HashObjectCommand
   const command = new HashObjectCommand(flag, filePath);
   gitClient.run(command);
+}
+
+function handleLsTreeCommand() {
+  let flag = process.argv[3];
+  let sha = process.argv[4];
+
+  if (!sha && flag === "--name-only") return;
+
+  if (!sha) {
+    sha = flag;
+    flag = null;
+  }
 }
