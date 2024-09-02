@@ -11,24 +11,30 @@ function writeFileBlob(currentPath) {
 
   const hash = crypto.createHash("sha1").update(blob).digest("hex");
 
-  const folder = hash.slice(0, 2);
-  const file = hash.slice(2);
+  const folder = hash.slice(0, 2); // Use only the first two characters
+  const file = hash.slice(2); // Remaining part of the hash
 
   const completeFolderPath = path.join(
     process.cwd(),
     ".git",
     "objects",
-    folder,
-    file
+    folder
   );
 
-  if (!fs.existsSync(completeFolderPath)) fs.mkdirSync(completeFolderPath);
+  // Create the parent folder if it doesn't exist
+  if (!fs.existsSync(completeFolderPath)) {
+    fs.mkdirSync(completeFolderPath, { recursive: true });
+  }
+
+  // Path to write the file
+  const filePath = path.join(completeFolderPath, file);
 
   const compressedData = zlib.deflateSync(blob);
-  fs.writeFileSync(path.join(completeFolderPath, file), compressedData);
+  fs.writeFileSync(filePath, compressedData);
 
   return hash;
 }
+
 class handleWriteTreeCommand {
   constructor() {}
 
