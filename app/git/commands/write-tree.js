@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const zlib = require("zlib");
+
 function writeFileBlob(currentPath) {
   const contents = fs.readFileSync(currentPath);
   const len = contents.length;
@@ -74,7 +75,7 @@ class handleWriteTreeCommand {
         const { mode, basename, sha } = current;
         return Buffer.concat([
           acc,
-          Buffer.from(`${mode}${basePath}\0`),
+          Buffer.from(`${mode} ${basename}\0`),
           Buffer.from(sha, "hex"),
         ]);
       }, Buffer.alloc(0));
@@ -96,7 +97,8 @@ class handleWriteTreeCommand {
         folder
       );
 
-      if (!fs.existsSync(treeFolderPath)) fs.mkdirSync(treeFolderPath);
+      if (!fs.existsSync(treeFolderPath))
+        fs.mkdirSync(treeFolderPath, { recursive: true });
 
       const compressed = zlib.deflateSync(tree);
       fs.writeFileSync(path.join(treeFolderPath, file), compressed);
@@ -104,8 +106,8 @@ class handleWriteTreeCommand {
       return hash;
     }
 
-    recursiveCreateTree(process.cwd());
-    process.stdout.write(sha);
+    const sha = recursiveCreateTree(process.cwd()); // Capture the returned SHA-1 hash
+    process.stdout.write(sha); // Write the SHA-1 hash to stdout
   }
 }
 
