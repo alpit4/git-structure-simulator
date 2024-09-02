@@ -75,8 +75,8 @@ class handleWriteTreeCommand {
         const { mode, basename, sha } = current;
         return Buffer.concat([
           acc,
-          Buffer.from(`${mode} ${basename}\0`),
-          Buffer.from(sha, "hex"),
+          Buffer.from(`${mode} ${basename}\0`), // Fix: add space after mode and use null terminator
+          Buffer.from(sha, "hex"), // Fix: convert sha to raw binary
         ]);
       }, Buffer.alloc(0));
 
