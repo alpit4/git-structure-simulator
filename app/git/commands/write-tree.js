@@ -45,7 +45,7 @@ class handleWriteTreeCommand {
       const result = [];
 
       for (const dirContent of dirContents) {
-        if (dirContent.includes(".git")) continue;
+        if (dirContent === ".git") continue; // Skip the .git directory itself
 
         const currentPath = path.join(basePath, dirContent);
         const stat = fs.statSync(currentPath);
@@ -54,16 +54,16 @@ class handleWriteTreeCommand {
           const sha = recursiveCreateTree(currentPath);
           if (sha) {
             result.push({
-              mode: "40000",
-              basename: path.basename(currentPath),
+              mode: "40000", // Mode for directories
+              basename: dirContent,
               sha,
             });
           }
         } else if (stat.isFile()) {
           const sha = writeFileBlob(currentPath);
           result.push({
-            mode: "100644",
-            basename: path.basename(currentPath),
+            mode: "100644", // Mode for files
+            basename: dirContent,
             sha,
           });
         }
@@ -75,8 +75,8 @@ class handleWriteTreeCommand {
         const { mode, basename, sha } = current;
         return Buffer.concat([
           acc,
-          Buffer.from(`${mode} ${basename}\0`), // Fix: add space after mode and use null terminator
-          Buffer.from(sha, "hex"), // Fix: convert sha to raw binary
+          Buffer.from(`${mode} ${basename}\0`), // Correctly format the mode and basename with null terminator
+          Buffer.from(sha, "hex"), // Convert SHA to raw binary using 'hex' encoding
         ]);
       }, Buffer.alloc(0));
 
@@ -97,8 +97,9 @@ class handleWriteTreeCommand {
         folder
       );
 
-      if (!fs.existsSync(treeFolderPath))
+      if (!fs.existsSync(treeFolderPath)) {
         fs.mkdirSync(treeFolderPath, { recursive: true });
+      }
 
       const compressed = zlib.deflateSync(tree);
       fs.writeFileSync(path.join(treeFolderPath, file), compressed);
@@ -106,7 +107,7 @@ class handleWriteTreeCommand {
       return hash;
     }
 
-    const sha = recursiveCreateTree(process.cwd()); // Capture the returned SHA-1 hash
+    const sha = recursiveCreateTree(process.cwd());
     process.stdout.write(sha); // Write the SHA-1 hash to stdout
   }
 }
