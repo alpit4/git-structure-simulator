@@ -11,14 +11,17 @@ class CommitTreeCommand {
   }
 
   execute() {
+    // Get the current timestamp in seconds since the Unix epoch
+    const timestamp = Math.floor(Date.now() / 1000);
+
     const commitContentBuffer = Buffer.concat([
       Buffer.from(`tree ${this.treeSHA}\n`),
       Buffer.from(`parent ${this.parentSHA}\n`),
-      Buffer.from(`
-            author Alpit Kumar <alpitkumar85@gmail.com> ${Date.now()} + 0000\n`),
-
       Buffer.from(
-        `commiter Alpit Kumar <alpitkumar85@gmail.com> ${Date.now()} + 0000\n\n`
+        `author Alpit Kumar <alpitkumar85@gmail.com> ${timestamp} +0000\n`
+      ),
+      Buffer.from(
+        `committer Alpit Kumar <alpitkumar85@gmail.com> ${timestamp} +0000\n\n`
       ),
       Buffer.from(`${this.message}\n`),
     ]);
