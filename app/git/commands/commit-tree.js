@@ -5,7 +5,7 @@ const crypto = require("crypto");
 
 class CommitTreeCommand {
   constructor(tree, parent, message) {
-    this.tree = tree;
+    this.treeSHA = tree;
     this.parentSHA = parent;
     this.message = message;
   }
