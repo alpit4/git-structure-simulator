@@ -35,6 +35,7 @@ switch (command) {
     break;
   case "commit-tree":
     handleCommitTreeCommand();
+    break;
   default:
     throw new Error(`Unknown command ${command}`);
 }
